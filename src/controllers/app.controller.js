@@ -1,5 +1,7 @@
 import nodemailer from 'nodemailer'
 import Mailgen from 'mailgen'
+import twilio from 'twilio'
+
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -23,7 +25,7 @@ export const signup = async (req, res) => {
     }
 
     transporter.sendMail(message)
-        .then(info => res.status(201).json({ info: nodemailer.getTestMessageUrl(info)}))
+        .then(info => res.status(201).json({ info: nodemailer.getTestMessageUrl(info) }))
         .catch(err => res.status(500).json({ err }))
 }
 
@@ -68,6 +70,19 @@ export const getbill = (req, res) => {
         html: mail
     }
     transporter.sendMail(message)
-        .then(() => res.status(201).json({ status: 'success'}))
+        .then(() => res.status(201).json({ status: 'success' }))
         .catch(err => res.status(500).json({ err }))
+}
+
+export const sendSMS = (req, res) => {
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const client = twilio(accountSid, authToken)
+    client.messages
+        .create({
+            body: 'Hola Cerebro! Que vamos a hacer hoy?',
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: '+51942270712'
+        })
+        .then(message => res.send(message.sid));
 }
