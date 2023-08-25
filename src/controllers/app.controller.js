@@ -1,4 +1,6 @@
 import nodemailer from 'nodemailer'
+import dotenv from 'dotenv'
+dotenv.config()
 
 export const signup = async (req, res) => {
     let testAccount = await nodemailer.createTestAccount()
@@ -25,5 +27,21 @@ export const signup = async (req, res) => {
 }
 
 export const getbill = (req, res) => {
-    
+    let config = {
+        service: 'gmail',
+        auth: {
+            user: process.env.NODEMAILER_USER,
+            pass: process.env.NODEMAILER_PASS
+        }
+    }
+    let transporter = nodemailer.createTransport(config)
+    let message = {
+        from: process.env.NODEMAILER_USER,
+        to: req.body.useremail,
+        subject: 'Gracias por tu compra',
+        html: '<h1>gracias por tu compra</h1><hr /><p style="color: blue">Pronto tendras tus productos en tu casa</p>'
+    }
+    transporter.sendMail(message)
+        .then(() => res.status(201).json({ status: 'success'}))
+        .catch(err => res.status(500).json({ err }))
 }
